@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forging Industry Inventory System (No SQL)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .login-box, .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px grey;
+        }
+        input, button, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid gray;
+        }
+        button {
+            background: #222;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table, th, td {
+            border: 1px solid gray;
+            padding: 10px;
+        }
+        th {
+            background: #222;
+            color: white;
+        }
+        .logout-btn {
+            background: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="login-box" id="loginBox">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Enter Username">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- MAIN SYSTEM -->
+<div class="container" id="mainBox" style="display:none;">
+    <h2>Forging Industry Inventory System</h2>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <!-- Raw Material Section -->
+    <h3>Add Raw Material</h3>
+    <input type="text" id="rmName" placeholder="Material Name">
+    <input type="number" id="rmQty" placeholder="Quantity">
+    <button onclick="addRawMaterial()">Add Material</button>
+
+    <!-- Issue Material -->
+    <h3>Issue Material to Production</h3>
+    <input type="text" id="issueName" placeholder="Material Name">
+    <input type="number" id="issueQty" placeholder="Quantity to Issue">
+    <button onclick="issueMaterial()">Issue Material</button>
+
+    <!-- Finished Goods -->
+    <h3>Add Finished Goods</h3>
+    <input type="text" id="fgName" placeholder="Finished Product Name">
+    <input type="number" id="fgQty" placeholder="Quantity">
+    <button onclick="addFinishedGoods()">Add Finished Goods</button>
+
+    <!-- Dispatch Finished Goods -->
+    <h3>Dispatch Finished Goods</h3>
+    <input type="text" id="dispatchName" placeholder="Product Name">
+    <input type="number" id="dispatchQty" placeholder="Quantity to Dispatch">
+    <button onclick="dispatchGoods()">Dispatch</button>
+
+    <!-- Stock Report -->
+    <h3>Current Inventory Stock</h3>
+    <table id="stockTable">
+        <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+        </tr>
+    </table>
+</div>
+
+<script>
+    // ============= LOGIN SYSTEM =============
+    function login() {
+        let user = document.getElementById("username").value;
+        let pass = document.getElementById("password").value;
+
+        if (user === "admin" && pass === "123") {
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("mainBox").style.display = "block";
+        } else {
+            alert("Invalid Login");
+        }
+    }
+
+    function logout() {
+        document.getElementById("mainBox").style.display = "none";
+        document.getElementById("loginBox").style.display = "block";
+    }
+
+    // ============= INVENTORY LOGIC =============
+    function loadStock() {
+        let data = JSON.parse(localStorage.getItem("inventory")) || {};
+        let table = document.getElementById("stockTable");
+
+        table.innerHTML = `
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+            </tr>`;
+
+        for (let item in data) {
+            table.innerHTML += `
+                <tr>
+                    <td>${item}</td>
+                    <td>${data[item]}</td>
+                </tr>`;
+        }
+    }
+
+    function addRawMaterial() {
+        let name = document.getElementById("rmName").value;
+        let qty = parseInt(document.getElementById("rmQty").value);
+
+        if (name === "" || qty <= 0) {
+            alert("Enter valid details");
+            return;
+        }
+
+        let data = JSON.parse(localStorage.getItem("inventory")) || {};
+        data[name] = (data[name] || 0) + qty;
+
+        localStorage.setItem("inventory", JSON.stringify(data));
+        loadStock();
+        alert("Raw Material Added");
+    }
+
+    function issueMaterial() {
+        let name = document.getElementById("issueName").value;
+        let qty = parseInt(document.getElementById("issueQty").value);
+
+        let data = JSON.parse(localStorage.getItem("inventory")) || {};
+
+        if (!data[name]) {
+            alert("Material not found");
+            return;
+        }
+        if (data[name] < qty) {
+            alert("Not enough material");
+            return;
+        }
+
+        data[name] -= qty;
+        localStorage.setItem("inventory", JSON.stringify(data));
+        loadStock();
+        alert("Material Issued");
+    }
+
+    function addFinishedGoods() {
+        let name = document.getElementById("fgName").value;
+        let qty = parseInt(document.getElementById("fgQty").value);
+
+        let data = JSON.parse(localStorage.getItem("inventory")) || {};
+        data[name] = (data[name] || 0) + qty;
+
+        localStorage.setItem("inventory", JSON.stringify(data));
+        loadStock();
+        alert("Finished Goods Added");
+    }
+
+    function dispatchGoods() {
+        let name = document.getElementById("dispatchName").value;
+        let qty = parseInt(document.getElementById("dispatchQty").value);
+
+        let data = JSON.parse(localStorage.getItem("inventory")) || {};
+
+        if (!data[name]) {
+            alert("Product not found");
+            return;
+        }
+        if (data[name] < qty) {
+            alert("Not enough stock");
+            return;
+        }
+
+        data[name] -= qty;
+        localStorage.setItem("inventory", JSON.stringify(data));
+        loadStock();
+        alert("Goods Dispatched");
+    }
+
+    loadStock();
+</script>
+
+</body>
+</html>
