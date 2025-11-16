@@ -61,8 +61,10 @@
 <!-- LOGIN PAGE -->
 <div class="login-box" id="loginBox">
     <h2>Login</h2>
+
     <input type="text" id="username" placeholder="Enter Username">
     <input type="password" id="password" placeholder="Enter Password">
+
     <button onclick="login()">Login</button>
 </div>
 
@@ -107,16 +109,18 @@
 </div>
 
 <script>
-    // ============= LOGIN SYSTEM =============
-    function login() {
-        let user = document.getElementById("username").value;
-        let pass = document.getElementById("password").value;
 
-        if (user === "admin" && pass === "123") {
+    // ================= LOGIN SYSTEM (100% WORKING) =================
+    function login() {
+        let u = document.getElementById("username").value.trim();
+        let p = document.getElementById("password").value.trim();
+
+        // Always convert username to lowercase to avoid typing mistakes
+        if (u.toLowerCase() === "amrit" && p === "12345") {
             document.getElementById("loginBox").style.display = "none";
             document.getElementById("mainBox").style.display = "block";
         } else {
-            alert("Invalid Login");
+            alert("Incorrect username or password");
         }
     }
 
@@ -125,7 +129,8 @@
         document.getElementById("loginBox").style.display = "block";
     }
 
-    // ============= INVENTORY LOGIC =============
+    // ================= INVENTORY SYSTEM =================
+
     function loadStock() {
         let data = JSON.parse(localStorage.getItem("inventory")) || {};
         let table = document.getElementById("stockTable");
@@ -217,6 +222,7 @@
     }
 
     loadStock();
+
 </script>
 
 </body>
